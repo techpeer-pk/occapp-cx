@@ -62,7 +62,8 @@ export default function AdminLayout() {
         </nav>
 
         <div className="p-3 border-t border-gray-700">
-          <div className="flex items-center gap-3 px-3 py-2 mb-2">
+          <NavLink to="/admin/profile" onClick={() => setOpen(false)}
+            className="flex items-center gap-3 px-3 py-2 mb-2 rounded-lg hover:bg-gray-800 transition-colors">
             <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
               {profile?.name?.[0]?.toUpperCase()}
             </div>
@@ -70,7 +71,7 @@ export default function AdminLayout() {
               <p className="text-sm font-medium truncate">{profile?.name}</p>
               <p className="text-xs text-gray-400 capitalize">{profile?.role}</p>
             </div>
-          </div>
+          </NavLink>
           <button onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
             <LogOut size={18} /> Logout

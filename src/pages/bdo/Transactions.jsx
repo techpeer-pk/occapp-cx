@@ -1,9 +1,137 @@
 import { useEffect, useState } from 'react'
-import { collection, query, where, onSnapshot } from 'firebase/firestore'
+import { collection, query, where, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase/config'
 import { useAuth } from '../../context/AuthContext'
+import { useForm } from 'react-hook-form'
 import { format } from 'date-fns'
-import { List, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { List, Search, ArrowUpDown, ArrowUp, ArrowDown, Plus, PlusCircle } from 'lucide-react'
+import toast from 'react-hot-toast'
+
+function formatWallet(raw) {
+  const digits = raw.replace(/\D/g, '')
+  if (!digits.startsWith('92')) return '92'
+  return digits.slice(0, 12)
+}
+
+function QuickAddModal({ onClose, user, profile }) {
+  const [topupTypes, setTopupTypes] = useState([])
+  const [saving, setSaving] = useState(false)
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm({
+    defaultValues: { walletNumber: '92' }
+  })
+
+  useEffect(() => {
+    const unsub = onSnapshot(
+      query(collection(db, 'topupTypes'), where('active', '==', true)),
+      snap => setTopupTypes(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    )
+    return unsub
+  }, [])
+
+  const onSubmit = async (data) => {
+    setSaving(true)
+    try {
+      const topupType = topupTypes.find(t => t.id === data.topupTypeId)
+      await addDoc(collection(db, 'transactions'), {
+        bdoUid:        user.uid,
+        bdoName:       profile.name,
+        kioskId:       profile.kioskId      ?? '',
+        kioskCode:     profile.kioskName    ?? '',
+        merchantName:  profile.merchantName ?? '',
+        topupTypeId:   data.topupTypeId,
+        topupTypeName: topupType?.name ?? '',
+        topupTypeCode: topupType?.code ?? '',
+        amount:        Number(data.amount),
+        customerName:  data.customerName?.trim() ?? '',
+        walletNumber:  data.walletNumber?.trim() ?? '',
+        remarks:       data.remarks?.trim() ?? '',
+        status:        'pending',
+        createdAt:     serverTimestamp(),
+      })
+      toast.success('Transaction recorded!')
+      reset({ walletNumber: '92' })
+      onClose()
+    } catch (e) {
+      toast.error('Failed: ' + e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-5 border-b sticky top-0 bg-white">
+          <div>
+            <h3 className="font-semibold text-gray-800">New Cash Entry</h3>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {profile?.kioskName || 'Your Kiosk'}{profile?.merchantName ? ` · ${profile.merchantName}` : ''}
+            </p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+        </div>
+        <div className="p-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <label className="label">Top-up Type *</label>
+              <select className="input" {...register('topupTypeId', { required: 'Select type' })}>
+                <option value="">— Select Type —</option>
+                {topupTypes.map(t => (
+                  <option key={t.id} value={t.id}>{t.name} ({t.code})</option>
+                ))}
+              </select>
+              {errors.topupTypeId && <p className="text-red-500 text-xs mt-1">{errors.topupTypeId.message}</p>}
+            </div>
+
+            <div>
+              <label className="label">Amount (PKR) *</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">Rs.</span>
+                <input type="number" min="1" step="1" className="input pl-10" placeholder="0"
+                  {...register('amount', { required: 'Amount required', min: { value: 1, message: 'Must be > 0' } })} />
+              </div>
+              {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount.message}</p>}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="label">Customer Name *</label>
+                <input className="input" placeholder="Full name"
+                  {...register('customerName', { required: 'Required' })} />
+                {errors.customerName && <p className="text-red-500 text-xs mt-1">{errors.customerName.message}</p>}
+              </div>
+              <div>
+                <label className="label">ARY Wallet # *</label>
+                <input className="input font-mono tracking-wide" placeholder="92xxxxxxxxxx" maxLength={12}
+                  {...register('walletNumber', {
+                    required: 'Required',
+                    validate: v => /^92\d{10}$/.test(v) || '12 digits starting with 92',
+                  })}
+                  onChange={e => setValue('walletNumber', formatWallet(e.target.value), { shouldValidate: true })}
+                />
+                {errors.walletNumber
+                  ? <p className="text-red-500 text-xs mt-1">{errors.walletNumber.message}</p>
+                  : <p className="text-gray-400 text-xs mt-1">92xxxxxxxxxx</p>}
+              </div>
+            </div>
+
+            <div>
+              <label className="label">Remarks</label>
+              <input className="input" placeholder="Optional" {...register('remarks')} />
+            </div>
+
+            <div className="flex gap-3 pt-1">
+              <button type="submit" disabled={saving} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                <PlusCircle size={16} />{saving ? 'Saving…' : 'Record Transaction'}
+              </button>
+              <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function SortTh({ label, k, sortKey, sortDir, onSort }) {
   const active = sortKey === k
@@ -21,13 +149,14 @@ function SortTh({ label, k, sortKey, sortDir, onSort }) {
 }
 
 export default function BDOTransactions() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const [txs,     setTxs]     = useState([])
   const [loading, setLoading] = useState(true)
   const [filter,  setFilter]  = useState('all')
   const [search,  setSearch]  = useState('')
   const [sortKey, setSortKey] = useState('date')
   const [sortDir, setSortDir] = useState('desc')
+  const [modal,   setModal]   = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -75,6 +204,9 @@ export default function BDOTransactions() {
           <h1 className="text-2xl font-bold text-gray-900">My Transactions</h1>
           <p className="text-sm text-gray-500 mt-1">{displayed.length} of {txs.length} records</p>
         </div>
+        <button onClick={() => setModal(true)} className="btn-primary flex items-center gap-2">
+          <Plus size={16} /> New Entry
+        </button>
       </div>
 
       {/* Filters + Search */}
@@ -153,6 +285,14 @@ export default function BDOTransactions() {
             </table>
           </div>
         </div>
+      )}
+
+      {modal && (
+        <QuickAddModal
+          onClose={() => setModal(false)}
+          user={user}
+          profile={profile}
+        />
       )}
     </div>
   )

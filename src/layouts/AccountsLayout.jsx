@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { LayoutDashboard, Landmark, GitMerge, LogOut, Menu } from 'lucide-react'
 import { useState } from 'react'
@@ -44,7 +44,8 @@ export default function AccountsLayout() {
           ))}
         </nav>
         <div className="p-3 border-t border-gray-700">
-          <div className="flex items-center gap-3 px-3 py-2 mb-2">
+          <Link to="/accounts/profile" onClick={() => setOpen(false)}
+            className="flex items-center gap-3 px-3 py-2 mb-2 rounded-lg hover:bg-gray-800 transition-colors">
             <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
               {profile?.name?.[0]?.toUpperCase()}
             </div>
@@ -52,7 +53,7 @@ export default function AccountsLayout() {
               <p className="text-sm font-medium truncate">{profile?.name}</p>
               <p className="text-xs text-gray-400">Accounts</p>
             </div>
-          </div>
+          </Link>
           <button onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
             <LogOut size={18} /> Logout

@@ -56,8 +56,14 @@ export function AuthProvider({ children }) {
 
   const logout = () => signOut(auth)
 
+  const refreshProfile = async () => {
+    if (!auth.currentUser) return
+    const snap = await getDoc(doc(db, 'users', auth.currentUser.uid))
+    setProfile(snap.exists() ? snap.data() : null)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, profile, loading, login, signup, logout, refreshProfile }}>
       {!loading && children}
     </AuthContext.Provider>
   )

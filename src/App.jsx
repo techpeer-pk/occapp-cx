@@ -32,6 +32,9 @@ import AccountsDashboard from './pages/accounts/Dashboard'
 import Deposits          from './pages/accounts/Deposits'
 import Reconciliation    from './pages/accounts/Reconciliation'
 
+// Shared
+import Profile from './pages/Profile'
+
 function RoleRouter() {
   const { profile } = useAuth()
 
@@ -75,6 +78,7 @@ export default function App() {
         <Route path="topup-types"    element={<TopupTypes />} />
         <Route path="payment-modes"  element={<PaymentModes />} />
         <Route path="reports"        element={<AdminReports />} />
+        <Route path="profile"        element={<Profile />} />
       </Route>
 
       {/* ── BDO ── */}
@@ -86,6 +90,7 @@ export default function App() {
         <Route index               element={<BDODashboard />} />
         <Route path="new"          element={<NewTransaction />} />
         <Route path="transactions" element={<BDOTransactions />} />
+        <Route path="profile"      element={<Profile />} />
       </Route>
 
       {/* ── Recovery Officer ── */}
@@ -97,6 +102,7 @@ export default function App() {
         <Route index          element={<RecoveryDashboard />} />
         <Route path="pending" element={<PendingPickups />} />
         <Route path="history" element={<RecoveryHistory />} />
+        <Route path="profile" element={<Profile />} />
       </Route>
 
       {/* ── Accounts ── */}
@@ -108,6 +114,7 @@ export default function App() {
         <Route index                element={<AccountsDashboard />} />
         <Route path="deposits"      element={<Deposits />} />
         <Route path="reconciliation" element={<Reconciliation />} />
+        <Route path="profile"        element={<Profile />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
