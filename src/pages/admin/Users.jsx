@@ -77,12 +77,13 @@ export default function Users() {
     try {
       const kiosk   = kiosks.find(k => k.id === data.kioskId)
       const payload = {
-        name:       data.name.trim(),
-        email:      data.email.trim().toLowerCase(),
-        role:       data.role,
-        kioskId:    data.kioskId   ?? '',
-        kioskName:  kiosk?.kioskCode ?? '',
-        active:     true,
+        name:         data.name.trim(),
+        email:        data.email.trim().toLowerCase(),
+        role:         data.role,
+        kioskId:      data.kioskId       ?? '',
+        kioskName:    kiosk?.kioskCode   ?? '',
+        merchantName: kiosk?.merchantName ?? '',
+        active:       true,
       }
 
       if (modal === 'add') {

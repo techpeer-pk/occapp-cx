@@ -66,7 +66,7 @@ export default function NewTransaction() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">New Cash Entry</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Record a customer wallet top-up — <span className="font-medium">{profile?.kioskName || 'Your Kiosk'}</span>
+          Record a customer wallet top-up — <span className="font-medium">{profile?.kioskName || 'Your Kiosk'}{profile?.merchantName ? ` · ${profile.merchantName}` : ''}</span>
         </p>
       </div>
 

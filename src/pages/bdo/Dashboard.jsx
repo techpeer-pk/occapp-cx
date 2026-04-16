@@ -37,7 +37,9 @@ export default function BDODashboard() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Hi, {profile?.name?.split(' ')[0]} 👋</h1>
           <p className="text-sm text-gray-500 mt-1">
-            {profile?.kioskName ? `Kiosk: ${profile.kioskName}` : 'BDO Dashboard'} — {format(new Date(), 'd MMM yyyy')}
+            {profile?.kioskName
+              ? `Kiosk: ${profile.kioskName}${profile.merchantName ? ` · ${profile.merchantName}` : ''}`
+              : 'BDO Dashboard'} — {format(new Date(), 'd MMM yyyy')}
           </p>
         </div>
         <Link to="/bdo/new" className="btn-primary flex items-center gap-2">

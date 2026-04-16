@@ -7,14 +7,17 @@ import { db } from '../../firebase/config'
 import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
-import { CheckCircle, Clock } from 'lucide-react'
+import { CheckCircle, Clock, Banknote } from 'lucide-react'
 
 export default function PendingPickups() {
   const { user, profile } = useAuth()
-  const [pending,  setPending]  = useState([])
-  const [loading,  setLoading]  = useState(true)
-  const [selected, setSelected] = useState(new Set())
-  const [saving,   setSaving]   = useState(false)
+  const [pending,      setPending]      = useState([])
+  const [paymentModes, setPaymentModes] = useState([])
+  const [loading,      setLoading]      = useState(true)
+  const [selected,     setSelected]     = useState(new Set())
+  const [saving,       setSaving]       = useState(false)
+  const [showModal,    setShowModal]    = useState(false)
+  const [selectedMode, setSelectedMode] = useState('')
 
   useEffect(() => {
     const q = query(collection(db, 'transactions'), where('status', '==', 'pending'))
@@ -24,6 +27,14 @@ export default function PendingPickups() {
         .sort((a, b) => (a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0))
       setPending(docs)
       setLoading(false)
+    })
+    return unsub
+  }, [])
+
+  useEffect(() => {
+    const q = query(collection(db, 'paymentModes'), where('active', '==', true))
+    const unsub = onSnapshot(q, snap => {
+      setPaymentModes(snap.docs.map(d => ({ id: d.id, ...d.data() })))
     })
     return unsub
   }, [])
@@ -55,8 +66,15 @@ export default function PendingPickups() {
     })
   }
 
-  const collectSelected = async () => {
+  const openCollectModal = () => {
     if (selected.size === 0) return toast.error('Select at least one transaction')
+    setSelectedMode('')
+    setShowModal(true)
+  }
+
+  const collectSelected = async () => {
+    if (!selectedMode) return toast.error('Select a payment mode')
+    setShowModal(false)
     setSaving(true)
     try {
       const toCollect = pending.filter(t => selected.has(t.id))
@@ -80,6 +98,7 @@ export default function PendingPickups() {
           collectedAt:      serverTimestamp(),
           recoveryUid:      user.uid,
           recoveryOfficer:  profile.name,
+          paymentMode:      selectedMode,
         })
       })
 
@@ -97,7 +116,8 @@ export default function PendingPickups() {
           bdoUid:          group.bdoUid,
           txIds:           group.txIds,
           amount:          group.amount,
-          status:          'collected',  // collected → deposited
+          paymentMode:     selectedMode,
+          status:          'collected',
           createdAt:       serverTimestamp(),
         })
       }
@@ -122,7 +142,7 @@ export default function PendingPickups() {
           <p className="text-sm text-gray-500 mt-1">{pending.length} transactions pending</p>
         </div>
         {selected.size > 0 && (
-          <button onClick={collectSelected} disabled={saving}
+          <button onClick={openCollectModal} disabled={saving}
             className="btn-primary flex items-center gap-2">
             <CheckCircle size={16} />
             {saving ? 'Processing…' : `Collect ${selected.size} (${fmt(selAmt)})`}
@@ -193,6 +213,57 @@ export default function PendingPickups() {
               </div>
             )
           })}
+        </div>
+      )}
+      {/* Payment Mode Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm">
+            <div className="flex items-center justify-between p-5 border-b">
+              <div className="flex items-center gap-2">
+                <Banknote size={18} className="text-brand" />
+                <h3 className="font-semibold text-gray-800">Select Payment Mode</h3>
+              </div>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+            </div>
+            <div className="p-5 space-y-3">
+              <p className="text-sm text-gray-500">
+                Collecting <span className="font-semibold text-gray-700">{selected.size} entries</span> worth <span className="font-semibold text-gray-700">{fmt(selAmt)}</span>. How will this cash move?
+              </p>
+              {paymentModes.length === 0 ? (
+                <p className="text-sm text-red-500">No payment modes available. Ask admin to add some.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {paymentModes.map(m => (
+                    <button
+                      key={m.id}
+                      onClick={() => setSelectedMode(m.name)}
+                      className={`p-3 rounded-lg border-2 text-left transition-colors ${
+                        selectedMode === m.name
+                          ? 'border-brand bg-brand/5 text-brand'
+                          : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                      }`}
+                    >
+                      <p className="font-semibold text-sm">{m.name}</p>
+                      {m.description && <p className="text-xs text-gray-400 mt-0.5">{m.description}</p>}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={collectSelected}
+                  disabled={!selectedMode || paymentModes.length === 0}
+                  className="btn-primary flex-1 flex items-center justify-center gap-2"
+                >
+                  <CheckCircle size={16} /> Confirm Collect
+                </button>
+                <button onClick={() => setShowModal(false)} className="btn-secondary px-5">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

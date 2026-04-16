@@ -76,6 +76,13 @@ service cloud.firestore {
             delete:           if isAdmin();
     }
 
+    // ── paymentModes ──────────────────────────────────────────────
+    match /paymentModes/{docId} {
+      allow read:             if isAuth() && isActive();
+      allow create, update,
+            delete:           if isAdmin();
+    }
+
     // ── transactions ─────────────────────────────────────────────
     // BDO: create own, read own.
     // Recovery: read all (to see pending pickups), update status.

@@ -8,7 +8,22 @@ import { useAuth } from '../../context/AuthContext'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
-import { Landmark, Plus } from 'lucide-react'
+import { Landmark, Plus, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+
+function SortTh({ label, k, sortKey, sortDir, onSort }) {
+  const active = sortKey === k
+  return (
+    <th onClick={() => onSort(k)}
+      className="text-left px-4 py-3 font-medium text-gray-600 text-xs uppercase tracking-wide whitespace-nowrap cursor-pointer select-none hover:bg-gray-100">
+      <span className="flex items-center gap-1">
+        {label}
+        {active
+          ? (sortDir === 'asc' ? <ArrowUp size={11} /> : <ArrowDown size={11} />)
+          : <ArrowUpDown size={11} className="opacity-30" />}
+      </span>
+    </th>
+  )
+}
 
 function Modal({ title, onClose, children }) {
   return (
@@ -32,6 +47,9 @@ export default function Deposits() {
   const [selected,    setSelected]    = useState(new Set())
   const [modal,       setModal]       = useState(false)
   const [saving,      setSaving]      = useState(false)
+  const [search,      setSearch]      = useState('')
+  const [sortKey,     setSortKey]     = useState('date')
+  const [sortDir,     setSortDir]     = useState('desc')
 
   const { register, handleSubmit, formState: { errors } } = useForm()
 
@@ -93,6 +111,28 @@ export default function Deposits() {
 
   const fmt = (n) => `Rs. ${Number(n).toLocaleString('en-PK')}`
 
+  const onSort = (key) => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortKey(key); setSortDir('asc') }
+  }
+
+  const displayedDeposits = deposits
+    .filter(d => {
+      if (!search) return true
+      const q = search.toLowerCase()
+      return [d.id, d.bankName, d.slipNumber, d.accountsName, d.remarks]
+        .some(v => v && String(v).toLowerCase().includes(q))
+    })
+    .sort((a, b) => {
+      let va, vb
+      if      (sortKey === 'date')   { va = a.createdAt?.seconds ?? 0; vb = b.createdAt?.seconds ?? 0 }
+      else if (sortKey === 'amount') { va = a.amount ?? 0;              vb = b.amount ?? 0             }
+      else                           { va = String(a[sortKey] ?? '');   vb = String(b[sortKey] ?? '')  }
+      if (va < vb) return sortDir === 'asc' ? -1 : 1
+      if (va > vb) return sortDir === 'asc' ?  1 : -1
+      return 0
+    })
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -145,8 +185,19 @@ export default function Deposits() {
 
       {/* Deposit history */}
       <div className="card p-0 overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
           <h2 className="font-semibold text-gray-800">Deposit History</h2>
+          {deposits.length > 0 && (
+            <div className="relative">
+              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search bank, slip…"
+                className="input pl-8 py-1.5 text-sm w-52"
+              />
+            </div>
+          )}
         </div>
         {loading ? <div className="py-12 text-center text-gray-400">Loading…</div>
           : deposits.length === 0 ? (
@@ -154,19 +205,30 @@ export default function Deposits() {
               <Landmark className="mx-auto mb-3 text-gray-300" size={40} />
               <p className="text-gray-500">No deposits recorded yet.</p>
             </div>
+          ) : displayedDeposits.length === 0 ? (
+            <div className="text-center py-12 text-gray-400">No results match "{search}"</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
-                    {['Date','Bank','Slip #','Amount','Recorded By','Remarks'].map(h => (
-                      <th key={h} className="text-left px-4 py-3 font-medium text-gray-600 text-xs uppercase tracking-wide whitespace-nowrap">{h}</th>
-                    ))}
+                    <th className="text-left px-4 py-3 font-medium text-gray-600 text-xs uppercase tracking-wide whitespace-nowrap">#ID</th>
+                    <SortTh label="Date"        k="date"         sortKey={sortKey} sortDir={sortDir} onSort={onSort} />
+                    <SortTh label="Bank"        k="bankName"     sortKey={sortKey} sortDir={sortDir} onSort={onSort} />
+                    <th className="text-left px-4 py-3 font-medium text-gray-600 text-xs uppercase tracking-wide whitespace-nowrap">Slip #</th>
+                    <SortTh label="Amount"      k="amount"       sortKey={sortKey} sortDir={sortDir} onSort={onSort} />
+                    <SortTh label="Recorded By" k="accountsName" sortKey={sortKey} sortDir={sortDir} onSort={onSort} />
+                    <th className="text-left px-4 py-3 font-medium text-gray-600 text-xs uppercase tracking-wide whitespace-nowrap">Remarks</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {deposits.map(d => (
+                  {displayedDeposits.map(d => (
                     <tr key={d.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        <span className="font-mono text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+                          #{d.id.slice(0, 7)}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
                         {d.createdAt?.toDate ? format(d.createdAt.toDate(), 'dd MMM yyyy, HH:mm') : '—'}
                       </td>

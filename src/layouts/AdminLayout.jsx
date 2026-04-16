@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import {
   LayoutDashboard, Store, MapPin, Users,
-  Tag, FileBarChart, LogOut, Menu, X
+  Tag, FileBarChart, LogOut, Menu, X, Banknote
 } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
@@ -12,8 +12,9 @@ const nav = [
   { to: '/admin/merchants',  icon: Store,           label: 'Merchants'           },
   { to: '/admin/kiosks',     icon: MapPin,          label: 'Kiosks'              },
   { to: '/admin/users',      icon: Users,           label: 'Users'               },
-  { to: '/admin/topup-types',icon: Tag,             label: 'Top-up Types'        },
-  { to: '/admin/reports',    icon: FileBarChart,    label: 'Reports'             },
+  { to: '/admin/topup-types',    icon: Tag,         label: 'Top-up Types'    },
+  { to: '/admin/payment-modes', icon: Banknote,    label: 'Payment Modes'   },
+  { to: '/admin/reports',        icon: FileBarChart, label: 'Reports'        },
 ]
 
 export default function AdminLayout() {

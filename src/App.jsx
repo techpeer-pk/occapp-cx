@@ -14,6 +14,7 @@ import Merchants       from './pages/admin/Merchants'
 import Kiosks          from './pages/admin/Kiosks'
 import Users           from './pages/admin/Users'
 import TopupTypes      from './pages/admin/TopupTypes'
+import PaymentModes    from './pages/admin/PaymentModes'
 import AdminReports    from './pages/admin/Reports'
 
 // BDO pages
@@ -71,8 +72,9 @@ export default function App() {
         <Route path="merchants"   element={<Merchants />} />
         <Route path="kiosks"      element={<Kiosks />} />
         <Route path="users"       element={<Users />} />
-        <Route path="topup-types" element={<TopupTypes />} />
-        <Route path="reports"     element={<AdminReports />} />
+        <Route path="topup-types"    element={<TopupTypes />} />
+        <Route path="payment-modes"  element={<PaymentModes />} />
+        <Route path="reports"        element={<AdminReports />} />
       </Route>
 
       {/* ── BDO ── */}
