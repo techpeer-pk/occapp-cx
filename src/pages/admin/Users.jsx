@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react'
 import {
-  collection, addDoc, updateDoc, deleteDoc,
-  doc, onSnapshot, serverTimestamp
+  collection, updateDoc, deleteDoc,
+  doc, setDoc, onSnapshot, serverTimestamp
 } from 'firebase/firestore'
-import {
-  createUserWithEmailAndPassword,
-  getAuth
-} from 'firebase/auth'
-import { db } from '../../firebase/config'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { db, secondaryAuth } from '../../firebase/config'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { Plus, Pencil, Trash2, Users as UsersIcon } from 'lucide-react'
@@ -89,16 +86,12 @@ export default function Users() {
       }
 
       if (modal === 'add') {
-        // Create Firebase Auth user
-        const secondaryAuth = getAuth()
+        // Create Firebase Auth user via secondary app so admin stays logged in
         const cred = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password)
         payload.uid       = cred.user.uid
         payload.createdAt = serverTimestamp()
-        await addDoc(collection(db, 'users'), { ...payload, uid: cred.user.uid })
-        // Also set by uid as doc id for quick lookup
-        await updateDoc(doc(db, 'users', cred.user.uid), payload).catch(() =>
-          addDoc(collection(db, 'users'), payload)
-        )
+        // setDoc with UID as document ID — single, correct document
+        await setDoc(doc(db, 'users', cred.user.uid), payload)
         toast.success('User created')
       } else {
         await updateDoc(doc(db, 'users', modal.edit), payload)

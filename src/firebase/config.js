@@ -15,4 +15,9 @@ const firebaseConfig = {
 const app  = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
 export const db   = getFirestore(app)
+
+// Secondary app — used to create new Auth users without logging out the current admin
+const secondaryApp = initializeApp(firebaseConfig, 'secondary')
+export const secondaryAuth = getAuth(secondaryApp)
+
 export default app

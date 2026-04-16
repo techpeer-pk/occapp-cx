@@ -40,11 +40,14 @@ service cloud.firestore {
     // Users can read their own profile.
     // Only admin can update/delete any user.
     match /users/{userId} {
+      // Self-signup: only bdo role, must be inactive
+      // Admin: can create any user (used from Users management page)
       allow create: if
-        request.auth != null &&
-        request.auth.uid == userId &&
-        request.resource.data.role == 'bdo' &&
-        request.resource.data.active == false;
+        (request.auth != null &&
+         request.auth.uid == userId &&
+         request.resource.data.role == 'bdo' &&
+         request.resource.data.active == false)
+        || isAdmin();
 
       allow read: if isAuth() && (uid() == userId || isAdmin());
 

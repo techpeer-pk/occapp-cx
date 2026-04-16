@@ -7,13 +7,21 @@ import toast from 'react-hot-toast'
 import { PlusCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
+function formatWallet(raw) {
+  const digits = raw.replace(/\D/g, '')
+  if (!digits.startsWith('92')) return '92'
+  return digits.slice(0, 12)
+}
+
 export default function NewTransaction() {
   const { user, profile } = useAuth()
   const navigate          = useNavigate()
   const [topupTypes, setTopupTypes] = useState([])
   const [saving,     setSaving]     = useState(false)
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm()
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm({
+    defaultValues: { walletNumber: '92' }
+  })
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -96,12 +104,30 @@ export default function NewTransaction() {
           {/* Customer / Wallet */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Customer Name</label>
-              <input className="input" placeholder="Optional" {...register('customerName')} />
+              <label className="label">Customer Name *</label>
+              <input className="input" placeholder="Full name"
+                {...register('customerName', { required: 'Customer name required' })} />
+              {errors.customerName && <p className="text-red-500 text-xs mt-1">{errors.customerName.message}</p>}
             </div>
             <div>
-              <label className="label">ARY Wallet #</label>
-              <input className="input" placeholder="03xx-xxxxxxx" {...register('walletNumber')} />
+              <label className="label">ARY Wallet # *</label>
+              <input
+                className="input font-mono tracking-wide"
+                placeholder="92xxxxxxxxxx"
+                maxLength={12}
+                {...register('walletNumber', {
+                  required: 'Wallet number required',
+                  validate: v => /^92\d{10}$/.test(v) || 'Must be 12 digits starting with 92',
+                })}
+                onChange={e => {
+                  const formatted = formatWallet(e.target.value)
+                  setValue('walletNumber', formatted, { shouldValidate: true })
+                }}
+              />
+              {errors.walletNumber
+                ? <p className="text-red-500 text-xs mt-1">{errors.walletNumber.message}</p>
+                : <p className="text-gray-400 text-xs mt-1">Format: 92xxxxxxxxxx (12 digits)</p>
+              }
             </div>
           </div>
 
@@ -117,7 +143,7 @@ export default function NewTransaction() {
               <PlusCircle size={18} />
               {saving ? 'Saving…' : 'Record Transaction'}
             </button>
-            <button type="button" onClick={() => reset()} className="btn-secondary px-6">
+            <button type="button" onClick={() => reset({ walletNumber: '92' })} className="btn-secondary px-6">
               Clear
             </button>
           </div>
