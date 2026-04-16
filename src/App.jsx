@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 
-import Login from './pages/Login'
+import Login  from './pages/Login'
+import Signup from './pages/Signup'
 import AdminLayout   from './layouts/AdminLayout'
 import BDOLayout     from './layouts/BDOLayout'
 import RecoveryLayout from './layouts/RecoveryLayout'
@@ -56,8 +57,9 @@ function ProtectedRoute({ children, allowedRoles }) {
 export default function App() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/"      element={<RoleRouter />} />
+      <Route path="/login"  element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/"       element={<RoleRouter />} />
 
       {/* ── Admin ── */}
       <Route path="/admin" element={

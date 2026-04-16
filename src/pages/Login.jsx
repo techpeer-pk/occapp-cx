@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
@@ -17,7 +17,11 @@ export default function Login() {
       await login(email, password)
       navigate('/')
     } catch (err) {
-      toast.error('Invalid email or password')
+      if (err.message === 'INACTIVE') {
+        toast.error('Your account is inactive. Contact your administrator.')
+      } else {
+        toast.error('Invalid email or password')
+      }
     } finally {
       setLoading(false)
     }
@@ -26,7 +30,6 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-brand rounded-2xl mb-4 shadow-lg">
             <span className="text-white font-bold text-2xl">A</span>
@@ -35,7 +38,6 @@ export default function Login() {
           <p className="text-gray-400 text-sm mt-1">Cash Collection Management System</p>
         </div>
 
-        {/* Card */}
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <h2 className="text-lg font-semibold text-gray-800 mb-6">Sign in to your account</h2>
 
@@ -69,6 +71,13 @@ export default function Login() {
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
+
+          <p className="text-center text-sm text-gray-500 mt-6">
+            New BDO?{' '}
+            <Link to="/signup" className="text-brand font-medium hover:underline">
+              Create an account
+            </Link>
+          </p>
         </div>
 
         <p className="text-center text-gray-500 text-xs mt-6">

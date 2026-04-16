@@ -1,17 +1,18 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import {
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../firebase/config'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user,    setUser]    = useState(null)
-  const [profile, setProfile] = useState(null)   // Firestore user doc
+  const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -29,13 +30,34 @@ export function AuthProvider({ children }) {
     return unsub
   }, [])
 
-  const login = (email, password) =>
-    signInWithEmailAndPassword(auth, email, password)
+  const login = async (email, password) => {
+    const cred = await signInWithEmailAndPassword(auth, email, password)
+    const snap = await getDoc(doc(db, 'users', cred.user.uid))
+    if (snap.exists() && snap.data().active === false) {
+      await signOut(auth)
+      throw new Error('INACTIVE')
+    }
+    return cred
+  }
+
+  const signup = async ({ name, email, password }) => {
+    const cred = await createUserWithEmailAndPassword(auth, email, password)
+    await setDoc(doc(db, 'users', cred.user.uid), {
+      uid:       cred.user.uid,
+      name:      name.trim(),
+      email:     email.trim().toLowerCase(),
+      role:      'bdo',
+      active:    false,
+      createdAt: serverTimestamp(),
+    })
+    // Sign out immediately — admin must activate first
+    await signOut(auth)
+  }
 
   const logout = () => signOut(auth)
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, profile, loading, login, signup, logout }}>
       {!loading && children}
     </AuthContext.Provider>
   )
