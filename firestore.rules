@@ -1,0 +1,123 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function uid() {
+      return request.auth.uid;
+    }
+
+    function userRole() {
+      return get(/databases/$(database)/documents/users/$(uid())).data.role;
+    }
+
+    function isActive() {
+      return get(/databases/$(database)/documents/users/$(uid())).data.active == true;
+    }
+
+    function isAdmin() {
+      return isAuth() && isActive() && userRole() == 'admin';
+    }
+
+    function isBDO() {
+      return isAuth() && isActive() && userRole() == 'bdo';
+    }
+
+    function isRecovery() {
+      return isAuth() && isActive() && userRole() == 'recovery';
+    }
+
+    function isAccounts() {
+      return isAuth() && isActive() && userRole() == 'accounts';
+    }
+
+    // ── users ─────────────────────────────────────────────────────
+    // Signup: unauthenticated users can create their own doc.
+    // Users can read their own profile.
+    // Only admin can update/delete any user.
+    match /users/{userId} {
+      allow create: if
+        request.auth != null &&
+        request.auth.uid == userId &&
+        request.resource.data.role == 'bdo' &&
+        request.resource.data.active == false;
+
+      allow read: if isAuth() && (uid() == userId || isAdmin());
+
+      allow update, delete: if isAdmin();
+    }
+
+    // ── merchants ─────────────────────────────────────────────────
+    // All active users can read. Only admin can write.
+    match /merchants/{docId} {
+      allow read:             if isAuth() && isActive();
+      allow create, update,
+            delete:           if isAdmin();
+    }
+
+    // ── kiosks ────────────────────────────────────────────────────
+    match /kiosks/{docId} {
+      allow read:             if isAuth() && isActive();
+      allow create, update,
+            delete:           if isAdmin();
+    }
+
+    // ── topupTypes ────────────────────────────────────────────────
+    match /topupTypes/{docId} {
+      allow read:             if isAuth() && isActive();
+      allow create, update,
+            delete:           if isAdmin();
+    }
+
+    // ── transactions ─────────────────────────────────────────────
+    // BDO: create own, read own.
+    // Recovery: read all (to see pending pickups), update status.
+    // Accounts: read all (for reconciliation), update status.
+    // Admin: full access.
+    match /transactions/{docId} {
+      allow create: if isBDO() &&
+        request.resource.data.bdoUid == uid();
+
+      allow read: if isAdmin() || isRecovery() || isAccounts() ||
+        (isBDO() && resource.data.bdoUid == uid());
+
+      allow update: if isAdmin() || isRecovery() || isAccounts();
+
+      allow delete: if isAdmin();
+    }
+
+    // ── collections ───────────────────────────────────────────────
+    // Recovery: create + read own.
+    // Accounts: read all (to select for deposit), update status.
+    // Admin: full access.
+    match /collections/{docId} {
+      allow create: if isRecovery() &&
+        request.resource.data.recoveryUid == uid();
+
+      allow read: if isAdmin() || isAccounts() ||
+        (isRecovery() && resource.data.recoveryUid == uid());
+
+      allow update: if isAdmin() || isAccounts();
+
+      allow delete: if isAdmin();
+    }
+
+    // ── deposits ──────────────────────────────────────────────────
+    // Accounts: create + read.
+    // Admin: full access.
+    match /deposits/{docId} {
+      allow create: if isAccounts() &&
+        request.resource.data.accountsUid == uid();
+
+      allow read:   if isAdmin() || isAccounts();
+
+      allow update,
+            delete: if isAdmin();
+    }
+
+  }
+}
