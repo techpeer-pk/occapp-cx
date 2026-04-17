@@ -7,6 +7,7 @@ import { db } from '../../firebase/config'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { Plus, Pencil, Trash2, Tag } from 'lucide-react'
+import Loader from '../../components/Loader'
 
 function Modal({ title, onClose, children }) {
   return (
@@ -96,7 +97,7 @@ export default function TopupTypes() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">Loading…</div>
+        <Loader />
       ) : types.length === 0 ? (
         <div className="card text-center py-16">
           <Tag className="mx-auto mb-3 text-gray-300" size={40} />

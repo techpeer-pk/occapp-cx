@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Eye, EyeOff, Loader2 } from 'lucide-react'
 
 export default function Signup() {
   const { signup }  = useAuth()
   const [loading,   setLoading]   = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [showPass,  setShowPass]  = useState(false)
+  const [showConf,  setShowConf]  = useState(false)
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm()
   const password = watch('password')
@@ -97,29 +99,41 @@ export default function Signup() {
 
             <div>
               <label className="label">Password</label>
-              <input
-                type="password"
-                className="input"
-                placeholder="Min 6 characters"
-                {...register('password', {
-                  required: 'Password is required',
-                  minLength: { value: 6, message: 'Minimum 6 characters' }
-                })}
-              />
+              <div className="relative">
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  className="input pr-10"
+                  placeholder="Min 6 characters"
+                  {...register('password', {
+                    required: 'Password is required',
+                    minLength: { value: 6, message: 'Minimum 6 characters' }
+                  })}
+                />
+                <button type="button" onClick={() => setShowPass(v => !v)} tabIndex={-1}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
               {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
             </div>
 
             <div>
               <label className="label">Confirm Password</label>
-              <input
-                type="password"
-                className="input"
-                placeholder="Re-enter password"
-                {...register('confirmPassword', {
-                  required: 'Please confirm your password',
-                  validate: val => val === password || 'Passwords do not match'
-                })}
-              />
+              <div className="relative">
+                <input
+                  type={showConf ? 'text' : 'password'}
+                  className="input pr-10"
+                  placeholder="Re-enter password"
+                  {...register('confirmPassword', {
+                    required: 'Please confirm your password',
+                    validate: val => val === password || 'Passwords do not match'
+                  })}
+                />
+                <button type="button" onClick={() => setShowConf(v => !v)} tabIndex={-1}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showConf ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
               {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
             </div>
 
@@ -131,8 +145,9 @@ export default function Signup() {
               </p>
             </div>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full py-2.5">
-              {loading ? 'Registering...' : 'Create Account'}
+            <button type="submit" disabled={loading} className="btn-primary w-full py-2.5 flex items-center justify-center gap-2">
+              {loading && <Loader2 size={16} className="animate-spin" />}
+              {loading ? 'Registering…' : 'Create Account'}
             </button>
           </form>
 

@@ -8,6 +8,7 @@ import { db, secondaryAuth } from '../../firebase/config'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { Plus, Pencil, Trash2, Users as UsersIcon } from 'lucide-react'
+import Loader from '../../components/Loader'
 
 const ROLES = [
   { value: 'admin',    label: 'Admin' },
@@ -125,7 +126,7 @@ export default function Users() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">Loading…</div>
+        <Loader />
       ) : users.length === 0 ? (
         <div className="card text-center py-16">
           <UsersIcon className="mx-auto mb-3 text-gray-300" size={40} />

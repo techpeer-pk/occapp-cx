@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import { CheckCircle, Clock, Banknote } from 'lucide-react'
+import Loader from '../../components/Loader'
 
 export default function PendingPickups() {
   const { user, profile } = useAuth()
@@ -151,7 +152,7 @@ export default function PendingPickups() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">Loading…</div>
+        <Loader />
       ) : pending.length === 0 ? (
         <div className="card text-center py-16">
           <CheckCircle className="mx-auto mb-3 text-green-400" size={40} />

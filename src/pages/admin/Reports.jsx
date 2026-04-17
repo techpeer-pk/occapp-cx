@@ -3,6 +3,7 @@ import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore
 import { db } from '../../firebase/config'
 import { format, startOfDay, endOfDay, subDays } from 'date-fns'
 import { FileBarChart, Download, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import Loader from '../../components/Loader'
 
 const RANGES = [
   { label: 'Today',        days: 0  },
@@ -187,7 +188,7 @@ export default function AdminReports() {
 
       {/* Table */}
       {loading ? (
-        <div className="text-center py-16 text-gray-400">Loading…</div>
+        <Loader rows={5} />
       ) : rows.length === 0 ? (
         <div className="card text-center py-16">
           <FileBarChart className="mx-auto mb-3 text-gray-300" size={40} />

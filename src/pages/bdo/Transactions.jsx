@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { format } from 'date-fns'
 import { List, Search, ArrowUpDown, ArrowUp, ArrowDown, Plus, PlusCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
+import Loader from '../../components/Loader'
 
 function formatWallet(raw) {
   const digits = raw.replace(/\D/g, '')
@@ -232,7 +233,7 @@ export default function BDOTransactions() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">Loading…</div>
+        <Loader />
       ) : displayed.length === 0 ? (
         <div className="card text-center py-16">
           <List className="mx-auto mb-3 text-gray-300" size={40} />

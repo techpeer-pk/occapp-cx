@@ -5,7 +5,7 @@ import { auth, db } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
-import { User, Lock, Mail, Shield, MapPin, Store } from 'lucide-react'
+import { User, Lock, Mail, Shield, MapPin, Store, Eye, EyeOff } from 'lucide-react'
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useAuth()
@@ -13,6 +13,8 @@ export default function Profile() {
   const [editingPass,  setEditingPass]  = useState(false)
   const [savingName,   setSavingName]   = useState(false)
   const [savingPass,   setSavingPass]   = useState(false)
+  const [showCurrent,  setShowCurrent]  = useState(false)
+  const [showNew,      setShowNew]      = useState(false)
 
   const nameForm = useForm({ defaultValues: { name: profile?.name ?? '' } })
   const passForm = useForm()
@@ -170,16 +172,28 @@ export default function Profile() {
           <form onSubmit={passForm.handleSubmit(savePassword)} className="space-y-3">
             <div>
               <label className="label">Current Password *</label>
-              <input type="password" className="input"
-                {...passForm.register('currentPassword', { required: 'Required' })} />
+              <div className="relative">
+                <input type={showCurrent ? 'text' : 'password'} className="input pr-10"
+                  {...passForm.register('currentPassword', { required: 'Required' })} />
+                <button type="button" onClick={() => setShowCurrent(v => !v)} tabIndex={-1}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showCurrent ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
               {passForm.formState.errors.currentPassword && (
                 <p className="text-red-500 text-xs mt-1">{passForm.formState.errors.currentPassword.message}</p>
               )}
             </div>
             <div>
               <label className="label">New Password *</label>
-              <input type="password" className="input" placeholder="Min 6 characters"
-                {...passForm.register('newPassword', { required: 'Required', minLength: { value: 6, message: 'Min 6 characters' } })} />
+              <div className="relative">
+                <input type={showNew ? 'text' : 'password'} className="input pr-10" placeholder="Min 6 characters"
+                  {...passForm.register('newPassword', { required: 'Required', minLength: { value: 6, message: 'Min 6 characters' } })} />
+                <button type="button" onClick={() => setShowNew(v => !v)} tabIndex={-1}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
               {passForm.formState.errors.newPassword && (
                 <p className="text-red-500 text-xs mt-1">{passForm.formState.errors.newPassword.message}</p>
               )}

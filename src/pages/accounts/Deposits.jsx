@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import { Landmark, Plus, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import Loader from '../../components/Loader'
 
 function SortTh({ label, k, sortKey, sortDir, onSort }) {
   const active = sortKey === k
@@ -199,7 +200,7 @@ export default function Deposits() {
             </div>
           )}
         </div>
-        {loading ? <div className="py-12 text-center text-gray-400">Loading…</div>
+        {loading ? <Loader inline rows={4} />
           : deposits.length === 0 ? (
             <div className="text-center py-16">
               <Landmark className="mx-auto mb-3 text-gray-300" size={40} />

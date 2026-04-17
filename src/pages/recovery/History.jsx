@@ -4,6 +4,7 @@ import { db } from '../../firebase/config'
 import { useAuth } from '../../context/AuthContext'
 import { format } from 'date-fns'
 import { History, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import Loader from '../../components/Loader'
 
 function SortTh({ label, k, sortKey, sortDir, onSort }) {
   const active = sortKey === k
@@ -89,7 +90,7 @@ export default function RecoveryHistory() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">Loading…</div>
+        <Loader />
       ) : displayed.length === 0 ? (
         <div className="card text-center py-16">
           <History className="mx-auto mb-3 text-gray-300" size={40} />

@@ -6,7 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts'
 import {
-  Banknote, Store, MapPin, Users, TrendingUp, Clock, CheckCircle
+  Store, MapPin, Users, TrendingUp, Clock, CheckCircle
 } from 'lucide-react'
 
 function StatCard({ icon: Icon, label, value, sub, color = 'blue' }) {
@@ -117,12 +117,11 @@ export default function AdminDashboard() {
         <p className="text-sm text-gray-500 mt-1">Overview — {format(new Date(), 'EEEE, d MMMM yyyy')}</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={TrendingUp}   color="brand"  label="Today's Collection" value={fmt(stats.todayAmount)} sub={`${stats.todayTx} transactions`} />
-        <StatCard icon={Clock}        color="yellow" label="Pending Recovery"   value={fmt(stats.pendingCollection)} sub="Not yet collected" />
-        <StatCard icon={CheckCircle}  color="green"  label="Total Deposited"    value={fmt(stats.deposited)} sub="All-time bank deposits" />
-        <StatCard icon={Banknote}     color="blue"   label="Total Merchants"    value={stats.totalMerchants} sub={`${stats.totalKiosks} kiosks`} />
+      {/* Financial KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard icon={TrendingUp}  color="brand"  label="Today's Collection"  value={fmt(stats.todayAmount)}        sub={`${stats.todayTx} transaction${stats.todayTx !== 1 ? 's' : ''} today`} />
+        <StatCard icon={Clock}       color="yellow" label="Pending Recovery"    value={fmt(stats.pendingCollection)}  sub="Cash not yet collected" />
+        <StatCard icon={CheckCircle} color="green"  label="Total Deposited"     value={fmt(stats.deposited)}          sub="All-time bank deposits" />
       </div>
 
       {/* Chart */}
@@ -139,11 +138,11 @@ export default function AdminDashboard() {
         </ResponsiveContainer>
       </div>
 
-      {/* Quick numbers */}
+      {/* Entity counts */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard icon={Store} color="blue"  label="Total Merchants" value={stats.totalMerchants} />
-        <StatCard icon={MapPin} color="green" label="Total Kiosks"   value={stats.totalKiosks} />
-        <StatCard icon={Users} color="yellow" label="Total Users"    value={stats.totalUsers} />
+        <StatCard icon={Store}  color="blue"   label="Total Merchants" value={stats.totalMerchants} sub="Registered merchants" />
+        <StatCard icon={MapPin} color="green"  label="Total Kiosks"    value={stats.totalKiosks}    sub="Active kiosk points" />
+        <StatCard icon={Users}  color="yellow" label="Total Users"     value={stats.totalUsers}     sub="System accounts" />
       </div>
     </div>
   )

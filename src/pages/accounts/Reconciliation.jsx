@@ -3,6 +3,7 @@ import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore
 import { db } from '../../firebase/config'
 import { format, startOfDay, endOfDay, subDays } from 'date-fns'
 import { GitMerge, CheckCircle, AlertCircle } from 'lucide-react'
+import Loader from '../../components/Loader'
 
 export default function Reconciliation() {
   const [data,    setData]    = useState(null)
@@ -61,7 +62,7 @@ export default function Reconciliation() {
       </div>
 
       {loading || !data ? (
-        <div className="text-center py-20 text-gray-400">Loading…</div>
+        <Loader rows={4} />
       ) : (
         <div className="space-y-6">
           {/* Pipeline */}
