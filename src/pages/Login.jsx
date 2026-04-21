@@ -56,8 +56,11 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4">
-      <div className="w-full max-w-md">
+    <div className="login-bg min-h-screen relative overflow-hidden flex items-center justify-center px-4">
+      <div className="login-orb login-orb-1" />
+      <div className="login-orb login-orb-2" />
+      <div className="login-orb login-orb-3" />
+      <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-brand rounded-2xl mb-4 shadow-lg">
             <span className="text-white font-bold text-2xl">A</span>
@@ -118,7 +121,7 @@ export default function Login() {
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            New BDO?{' '}
+            Are you new?{' '}
             <Link to="/signup" className="text-brand font-medium hover:underline">
               Create an account
             </Link>
@@ -129,6 +132,7 @@ export default function Login() {
           ARY Financial Services © {new Date().getFullYear()}
         </p>
       </div>
+
 
       {/* Forgot Password Modal */}
       {resetModal && (

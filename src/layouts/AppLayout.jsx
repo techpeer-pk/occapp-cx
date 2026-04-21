@@ -1,13 +1,18 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { LogOut, Menu } from 'lucide-react'
+import { useTheme } from '../context/ThemeContext'
+import { LogOut, Menu, Sun, Moon, Flame } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 
 export default function AppLayout({ navItems, panelLabel, brandInitial, profileTo, subLabel }) {
   const { profile, logout } = useAuth()
+  const { theme, cycleTheme } = useTheme()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+
+  const ThemeIcon = theme === 'dark' ? Moon : theme === 'warm' ? Flame : Sun
+  const themeLabel = theme === 'dark' ? 'Dark' : theme === 'warm' ? 'Warm' : 'Light'
 
   const handleLogout = async () => {
     await logout()
@@ -56,6 +61,10 @@ export default function AppLayout({ navItems, panelLabel, brandInitial, profileT
               <p className="text-xs text-gray-400 capitalize">{subLabel(profile)}</p>
             </div>
           </NavLink>
+          <button onClick={cycleTheme}
+            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors mb-1">
+            <ThemeIcon size={18} /> {themeLabel} Mode
+          </button>
           <button onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
             <LogOut size={18} /> Logout

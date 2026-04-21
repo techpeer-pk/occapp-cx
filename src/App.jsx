@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import PWAInstallPrompt from './components/PWAInstallPrompt'
 
 import AdminLayout    from './layouts/AdminLayout'
 import BDOLayout      from './layouts/BDOLayout'
@@ -63,6 +64,8 @@ function ProtectedRoute({ children, allowedRoles }) {
 
 export default function App() {
   return (
+    <>
+    <PWAInstallPrompt />
     <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/login"  element={<Login />} />
@@ -124,5 +127,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
+    </>
   )
 }

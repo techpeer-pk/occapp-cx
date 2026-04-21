@@ -1,0 +1,48 @@
+{
+  "name": "ARY Online Cash Collection Application",
+  "short_name": "ARY - OCCAPP",
+  "description": "Cash Collection & Reconciliation Management System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1e",
+  "theme_color": "#6b0f1a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Transaction",
+      "short_name": "New Entry",
+      "description": "BDO — Record a new cash transaction",
+      "url": "/bdo/new",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Pending Pickups",
+      "short_name": "Pickups",
+      "description": "Recovery — View pending cash pickups",
+      "url": "/recovery/pending",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Reconciliation",
+      "short_name": "Recon",
+      "description": "Accounts — Cash reconciliation dashboard",
+      "url": "/accounts/reconciliation",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Reports",
+      "short_name": "Reports",
+      "description": "Admin — View and export reports",
+      "url": "/admin/reports",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    }
+  ]
+}
